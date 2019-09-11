@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width", initial-scale1.0>
+		<meta http-equiv="X-UA-Compatible" content="ie=edge">
+		<title>Break Time!</title>
+
+		<link href="https://fonts.googleapis.com/css?family=Open+Sans&display=swap" rel="stylesheet">
+		<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+
+		<style>
+
+			html, body {
+				font-family: 'Open Sans', sans-serif;
+				font-size: 14px;
+				margin: 0;
+				min-height: 200px;
+				padding: 0;
+				width: 500px;
+			}
+
+			button.btn {
+				width: 100%;
+			}
+
+			h1, h2, h3 {
+				text-align: center;
+			}
+
+			#elapsedTime {
+				text-align: center;
+				color: #dc3545;
+				font-size: 50px !important;
+			}
+
+		</style>
+	</head>
+	<body>
+		<div class="card">
+			<div class="card-header">
+				<h2 class="card-title">BreakTime!</h2>
+			</div>
+			<div class="card-body">
+				<form action="">
+					<h3>Remind me in:</h3>
+					<div class="form-group row ml-1">
+						<select class="form-control col-3" name="hours" id="remindHours"></select>
+						<label class="col-3 col-form-label" for="hours">
+							Hour(s)
+						</label>
+						<select class="form-control col-3" name="minutes" id="remindMinutes" value="20"></select>
+						<label class="col-form-label col-3" for="minutes">Minute(s)</label>
+					</div>
+					<h3>Break duration:</h3>
+					<div class="form-group row ml-1">
+							<select class="form-control col-3" name="hours" id="breakHours"></select>
+							<label class="col-3 col-form-label" for="hours">
+								Hour(s)
+							</label>
+							<select class="form-control col-3" name="minutes" id="breakMinutes" value="20"></select>
+							<label class="col-form-label col-3" for="minutes">Minute(s)</label>
+					</div>
+					<button id="save" class="btn btn-primary btn-block">Save</button>
+				</form>
+
+
+			</div>
+			<ul class="list-group list-group-flush">
+				<li class="list-group-item">
+					<div class="col-12">
+						<div class="row justify-content-center">
+							<h2 id="timerState">Break time in:</h2>
+						</div>
+						<!-- <div class="row justify-content-center">
+							<h4>Time Elapsed:</h4>
+						</div> -->
+						<div class="row justify-content-center">
+							<p id="elapsedTime">0h 0m 0s</p>
+						</div>
+						<!-- <div class="row justify-content-end">
+							<div class="custom-control custom-checkbox">
+								<label class="custom-control-label" for="loopTimer">
+									<input type="checkbox" class="custom-control-input" id="loopTimer">
+									Loop
+								</label>
+							</div>
+						</div> -->
+					</div>
+				</li>
+			</ul>
+
+			<div class="card-footer">
+				<div class="row">
+					<div class="col-4">
+						<button type="button" id="startTimer" class="btn btn-success">Start Timer</button>
+					</div>
+					<div class="col-4">
+						<button type="button" id="pauseTimer" class="btn btn-warning">Pause Timer</button>
+					</div>
+					<div class="col-4">
+						<button type="button" id="stopTimer" class="btn btn-danger">Stop Timer</button>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<script src="popup.js"></script>
+	</body>
+</html>

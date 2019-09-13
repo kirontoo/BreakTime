@@ -1,6 +1,6 @@
 
 
-let elapsedTimeLabel = document.getElementById('elapsedTime');
+let remainingTimeLabel = document.getElementById('remainingTime');
 let startTimer = document.getElementById('startTimer');
 let pauseTimer = document.getElementById('pauseTimer');
 let stopTimer = document.getElementById('stopTimer');
@@ -18,56 +18,43 @@ let endTime = {
 	minutes: 0
 };
 
-initiateOptions();
-
 // sync storage values
-// chrome.storage.sync.get([ 'remindMinutes', 'remindHours' ], function( data ) {
-// 	remindMinutes.value = data.remindMinutes;
-// 	remindHours.value = data.remindHours;
-// 	breakMinutes.value = data.remindMinutes;
-// 	breakHours.value = data.remindHours;
-// 	endTime.hours = data.remindHours;
-// 	endTime.minutes = data.remindMinutes;
-// });
+chrome.storage.sync.get([
+	'remindMinutes',
+	'remindHours',
+	'breakHours',
+	'breakMinutes' ],
+	function( data ) {
 
+	remindMinutes.value = data.remindMinutes;
+	remindHours.value = data.remindHours;
+	breakMinutes.value = data.breakMinutes;
+	breakHours.value = data.breakHours;
+	endTime.hours = data.remindHours;
+	endTime.minutes = data.remindMinutes;
 
-let timer;
-startTimer.onclick = onStartTimer;
+	// set initial remaining time
+	remainingTimeLabel.innerHTML = `${endTime.hours}h ${endTime.minutes}m 0s`;
+});
 
-pauseTimer.onclick = function( element ){
-	if ( timer ) {
-		clearInterval( timer );
-		elapsedTimeLabel.style.color = '#ffc107';
-		timer = null;
+// handle requests from the background
+chrome.runtime.onMessage.addListener( async function ( request, sender, sendResponse ) {
+	if ( request.type === 'elapsed_time_changed' ) {
+		onRemainingTimeChanged( request.data.time );
+	} else if ( request.type === 'is_break_time' ) {
+		isBreakTime = request.isBreakTime;
+		onBreakTime();
 	}
-}
+});
 
-// stopTimer.onclick = function( element ) {
-// 	clearInterval( timer );
-// 	totalSeconds = 0;
-// 	elapsedTimeLabel.innerHTML = '0h 0m 0s';
-// 	elapsedTimeLabel.style.color = '#dc3545';
-// 	timer = null;
-// }
+// handle on click button events
+startTimer.onclick = onStartTimer;
+pauseTimer.onclick = onPauseTimer;
+stopTimer.onclick = onStopTimer;
+saveSettings.onclick =  onSaveSettings;
 
-stopTimer.onclick = resetTimer;
-
-saveSettings.onclick = function( elemen ) {
-	chrome.storage.sync.set( {
-		remindHours: remindHours.value,
-		remindMinutes: remindMinutes.value,
-		breakHours: breakHours.value,
-		breakMinutes: breakMinutes.value
-	}, function() {
-		if ( isBreakTime ) {
-			endTime.hours = remindHours.value;
-			endTime.minutes = remindMinutes.value;
-		} else {
-			endTime.hours = breakHours.value;
-			endTime.minutes = breakMinutes.value;
-		}
-	})
-}
+// fill up selection options for hours and minutes
+initiateOptions();
 
 function initiateOptions() {
 	let options = '';
@@ -82,63 +69,75 @@ function initiateOptions() {
 	breakMinutes.innerHTML = options;
 
 	// Set default value
-
+	endTime.minutes = remindMinutes.value;
+	endTime.hours = remindHours.value;
 }
 
-function calculateSeconds( hours, minutes) {
-	return minutes * 60 + ( hours * 60 * 60 );
-}
-
-function setTime() {
-	totalSeconds--;
-	let minutes = Math.floor( totalSeconds / 60 );
-	let seconds = Math.floor( totalSeconds % 60 );
-	let hours =  Math.floor( minutes / 60 );
-
-	elapsedTimeLabel.innerHTML = `${hours}h ${minutes}m ${seconds}s`;
-
-	if( totalSeconds === 0 ) {
-		// stop timer and reset values
-		resetTimer();
-
-		if ( !isBreakTime ) {
-			alert( "It's time for a break!" );
+// Adjust end timer values and labels depending on break or work mode.
+function onBreakTime() {
+		if ( isBreakTime ) {
 			endTime.hours = breakHours.value;
 			endTime.minutues = breakMinutes.value;
 			timerStateLabel.innerHTML = 'Time to work in:';
 		} else {
-			alert( "It's time to work!" );
 			endTime.hours = remindHours.value;
-			endTime.hours = remindMinutes.value;
+			endTime.minutes = remindMinutes.value;
 			timerStateLabel.innerHTML = 'Break time in:';
 		}
 
-		totalSeconds = calculateSeconds( endTime.hours, endTime.minutes );
-		elapsedTimeLabel.innerHTML = `${endTime.hours}h ${endTime.minutes}m 0s`;
-		isBreakTime = !isBreakTime;
-	}
+		remainingTimeLabel.innerHTML = `${endTime.hours}h ${endTime.minutes}m 0s`;
 }
 
 function onStartTimer() {
-	// make sure to use correct end time
-	endTime.minutes = remindMinutes.value;
-	endTime.hours = remindHours.value;
-	totalSeconds = calculateSeconds( endTime.hours, endTime.minutes );
-	elapsedTimeLabel.style.color = '#28a745';
-	elapsedTimeLabel.value = '0h 0m 0s';
-	// make sure to only initiate one set interval
-	if ( !timer ) {
-		timer = setInterval( setTime, 1000);
-	}
+	chrome.runtime.sendMessage( {
+		type: "start_timer",
+		data: {
+			endTime: endTime
+		}
+	});
+
+	remainingTimeLabel.style.color = '#28a745';
 }
 
-function resetTimer() {
-	clearInterval( timer );
-	timer = null;
-	elapsedTimeLabel.style.color = 'red';
-	elapsedTimeLabel.style.color = '#dc3545';
-	elapsedTimeLabel.innerHTML = '0h 0m 0s';
-	totalSeconds = 0
+function onPauseTimer(){
+	chrome.runtime.sendMessage({
+		type: "pause_timer"
+	});
+
+	remainingTimeLabel.style.color = '#ffc107';
 }
 
+function onStopTimer() {
+	chrome.runtime.sendMessage( {
+		type: "stop_timer"
+	});
 
+	// reset remaining time label
+	remainingTimeLabel.style.color = 'red';
+	remainingTimeLabel.style.color = '#dc3545';
+	remainingTimeLabel.innerHTML = '0h 0m 0s';
+}
+
+function onRemainingTimeChanged( timeRemaining ) {
+	remainingTimeLabel.style.color = '#28a745';
+	remainingTimeLabel.innerHTML = timeRemaining;
+}
+
+function onSaveSettings() {
+	chrome.storage.sync.set( {
+		remindHours: remindHours.value,
+		remindMinutes: remindMinutes.value,
+		breakHours: breakHours.value,
+		breakMinutes: breakMinutes.value
+	}, function() {
+		if ( isBreakTime ) {
+			endTime.hours = remindHours.value;
+			endTime.minutes = remindMinutes.value;
+		} else {
+			endTime.hours = breakHours.value;
+			endTime.minutes = breakMinutes.value;
+		}
+
+		onStopTimer();
+	});
+}

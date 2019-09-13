@@ -28,7 +28,7 @@
 				text-align: center;
 			}
 
-			#elapsedTime {
+			#remainingTime {
 				text-align: center;
 				color: #dc3545;
 				font-size: 50px !important;
@@ -72,20 +72,9 @@
 						<div class="row justify-content-center">
 							<h2 id="timerState">Break time in:</h2>
 						</div>
-						<!-- <div class="row justify-content-center">
-							<h4>Time Elapsed:</h4>
-						</div> -->
 						<div class="row justify-content-center">
-							<p id="elapsedTime">0h 0m 0s</p>
+							<p id="remainingTime">0h 0m 0s</p>
 						</div>
-						<!-- <div class="row justify-content-end">
-							<div class="custom-control custom-checkbox">
-								<label class="custom-control-label" for="loopTimer">
-									<input type="checkbox" class="custom-control-input" id="loopTimer">
-									Loop
-								</label>
-							</div>
-						</div> -->
 					</div>
 				</li>
 			</ul>
@@ -96,7 +85,7 @@
 						<button type="button" id="startTimer" class="btn btn-success">Start Timer</button>
 					</div>
 					<div class="col-4">
-						<button type="button" id="pauseTimer" class="btn btn-warning">Pause Timer</button>
+						<button type="button" id="pauseTimer" class="btn btn-warning text-white">Pause Timer</button>
 					</div>
 					<div class="col-4">
 						<button type="button" id="stopTimer" class="btn btn-danger">Stop Timer</button>
